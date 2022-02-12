@@ -1,0 +1,64 @@
+# TypeScript
+#
+build
+
+# OSX
+#
+.DS_Store
+
+# Xcode
+#
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.dSYM.zip
+*.xcuserstate
+project.xcworkspace
+
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+android/app/gradle.properties
+*.iml
+android/**/.settings
+android/**/.project
+android/app/version.properties
+android/app/src/main/res/raw/*
+!android/app/src/main/res/raw/*.wav
+android/app/src/debug/res
+android/app/bin/
+android/app/.classpath
+android/app/src/main/assets/index.android.bundle
+
+# node.js
+#
+node_modules/
+npm-debug.log
+
+yarn-error.log
+
+# Bundle artifact
+*.jsbundle
+
+# Expo
+.expo/
+
+.vscode/.react
+
+# Temporary folder
+tmp/
