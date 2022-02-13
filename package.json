@@ -11,6 +11,9 @@
     },
     "dependencies": {
         "@babel/plugin-proposal-decorators": "^7.17.2",
+        "@react-navigation/native": "^6.0.8",
+        "@react-navigation/native-stack": "^6.5.0",
+        "@types/": "react-navigation/native",
         "mobx": "^6.3.13",
         "mobx-react": "^7.2.1",
         "react": "17.0.2",
