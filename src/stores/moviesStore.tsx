@@ -1,12 +1,18 @@
+import dayjs from "dayjs";
 import { action, computed, makeObservable, observable } from "mobx";
-import { getUpcomingMovies, Movie } from "../api/movie";
+import { getMovieGenres } from "../api/genre";
+import { getUpcomingMovies, APIMovie } from "../api/movie";
+import { Genre, Movie } from "../types";
 
 export class MoviesStore {
     @observable
     private upcomingMovies: Movie[] = [];
 
     @observable
-    private upcomingMoviesCurrentPage: number = 1;
+    private movieGenres: Genre[] = [];
+
+    @observable
+    private upcomingMoviesCurrentPage: number = 0;
 
     @observable
     private upcomingMoviesTotalPages: number = 0;
@@ -28,14 +34,23 @@ export class MoviesStore {
     // Actions
     @action
     async refreshUpcomingMovies() {
-        const response = await getUpcomingMovies(1);
-        if (response.status !== "ok") {
+        this.setUpcomingMoviesCurrentPage(1);
+        const [upcomingMoviesResponse, genresResponse] = await Promise.all([
+            getUpcomingMovies(this.upcomingMoviesCurrentPage),
+            getMovieGenres(),
+        ]);
+        if (genresResponse.status === "ok") {
+            this.setMovieGenres(genresResponse.genres);
+        } else {
+            // TODO: retry some other time?
+        }
+        if (upcomingMoviesResponse.status !== "ok") {
             // TODO
             console.warn("no status ok");
             return;
         }
-        this.setUpcomingMovies(response.results);
-        this.setUpcomingMoviesTotalPages(response.total_pages);
+        this.setUpcomingMovies(this.mapApiMoviesToMovies(upcomingMoviesResponse.results));
+        this.setUpcomingMoviesTotalPages(upcomingMoviesResponse.total_pages);
     }
 
     @action
@@ -44,13 +59,16 @@ export class MoviesStore {
             return true;
         }
 
-        this.setUpcomingMoviesCurrentPage(this.upcomingMoviesCurrentPage + 1);
-        const response = await getUpcomingMovies(this.upcomingMoviesCurrentPage);
+        const response = await getUpcomingMovies(this.upcomingMoviesCurrentPage + 1);
         if (response.status !== "ok") {
             // TODO
             return false;
         }
-        this.setUpcomingMovies([...this.upcomingMovies, ...response.results]);
+        this.setUpcomingMoviesCurrentPage(this.upcomingMoviesCurrentPage + 1);
+        this.setUpcomingMovies([
+            ...this.upcomingMovies,
+            ...this.mapApiMoviesToMovies(response.results),
+        ]);
         return this.upcomingMoviesCurrentPage === this.upcomingMoviesTotalPages;
     }
 
@@ -74,6 +92,21 @@ export class MoviesStore {
         this.upcomingMoviesTotalPages = totalPages;
     }
 
+    @action
+    setMovieGenres(genres: Genre[]) {
+        this.movieGenres = genres;
+    }
+
+    getGenresOfMovie(movie: APIMovie) {
+        return this.movieGenres.filter((genre) => movie.genre_ids.includes(genre.id));
+    }
+
+    mapApiMoviesToMovies(apiMovies: APIMovie[]) {
+        return apiMovies.map((apiMovie) =>
+            mapAPIMovieToMovie(apiMovie, this.getGenresOfMovie(apiMovie))
+        );
+    }
+
     // Computed values
     @computed
     get filteredUpcomingMovies() {
@@ -86,4 +119,14 @@ export class MoviesStore {
             upcomingMovie.title.toLowerCase().includes(nameFilter.toLowerCase())
         );
     }
+}
+
+function mapAPIMovieToMovie(apiMovie: APIMovie, genres: Genre[]): Movie {
+    return {
+        title: apiMovie.title,
+        genres,
+        imagePath: apiMovie.poster_path || apiMovie.backdrop_path,
+        releaseDate: dayjs(apiMovie.release_date),
+        overview: apiMovie.overview,
+    };
 }

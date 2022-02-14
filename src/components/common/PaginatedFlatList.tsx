@@ -1,23 +1,30 @@
 import React, { useState } from "react";
-import { ActivityIndicator, FlatList, ListRenderItem, View } from "react-native";
+import { ActivityIndicator, FlatList, ListRenderItem, RefreshControl, View } from "react-native";
 import { Colors } from "./Styles";
 
 type Props<Data> = {
-    data: Data[];
+    data: Data[] | "loading";
     renderItem: ListRenderItem<Data>;
     loadNextPage: () => Promise<boolean>;
+    onRefresh: () => Promise<void>;
 };
 
-export function PaginatedFlatList<Data>({ loadNextPage, ...props }: Props<Data>) {
+export function PaginatedFlatList<Data>({
+    loadNextPage,
+    data,
+    renderItem,
+    onRefresh,
+}: Props<Data>) {
     const [loadingNextPage, setLoadingNextPage] = useState<boolean>(false);
     const [loadedAllPages, setLoadedAllPages] = useState<boolean>(false);
+
     async function onEndReached() {
-        if (loadingNextPage) {
+        if (loadingNextPage || loadedAllPages) {
             return;
         }
         setLoadingNextPage(true);
-        const loadedAllPages = await loadNextPage();
-        if (loadedAllPages) {
+        const loadedLastPage = await loadNextPage();
+        if (loadedLastPage) {
             setLoadedAllPages(true);
         }
         setLoadingNextPage(false);
@@ -25,11 +32,16 @@ export function PaginatedFlatList<Data>({ loadNextPage, ...props }: Props<Data>)
 
     return (
         <FlatList
+            data={data === "loading" ? [] : data}
+            renderItem={renderItem}
             style={{ backgroundColor: Colors.WHITE }}
-            {...props}
+            contentContainerStyle={{ backgroundColor: Colors.WHITE }}
             onEndReached={onEndReached}
             ListFooterComponent={loadingNextPage ? ListFooterComponent : undefined}
             onEndReachedThreshold={0.5}
+            refreshControl={
+                <RefreshControl refreshing={data === "loading"} onRefresh={onRefresh} />
+            }
         />
     );
 }

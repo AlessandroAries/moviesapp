@@ -1,7 +1,8 @@
 import { apiGetRequest, StatusErrorResponse, StatusOKResponse } from "./api";
 
 const BASE_URL = "/movie";
-export type Movie = {
+
+export type APIMovie = {
     poster_path?: string;
     adult: boolean;
     overview: string;
@@ -21,16 +22,16 @@ export type Movie = {
         minimum: string;
     };
 };
-export type APIUpcomingMovie = {
+
+export type UpcomingMoviesOKResponse = {
     page: number;
-    results: Movie[];
+    results: APIMovie[];
     total_pages: number;
     total_result: number;
 };
-type UpcomingMoviesResponse = StatusOKResponse<APIUpcomingMovie> | StatusErrorResponse;
-export async function getUpcomingMovies(page?: number): Promise<UpcomingMoviesResponse> {
+export async function getUpcomingMovies(page?: number) {
     const endpoint = "/upcoming";
-    return apiGetRequest({
+    return apiGetRequest<UpcomingMoviesOKResponse>({
         url: `${BASE_URL}${endpoint}`,
         queryParameters: page ? [{ name: "page", value: page }] : undefined,
     });

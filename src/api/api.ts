@@ -31,19 +31,17 @@ type ApiRequestParameters = ApiRequestBaseParameters & { method: Method };
 
 type GenericErrorStatus = "error" | "network-error";
 
-export type GenericErrorResponse<T> = StatusWithMessageResponse<T>;
-
-export type StatusWithMessageResponse<T> = {
+type StatusWithMessageResponse<T> = {
     status: T;
     message?: string;
 };
 
-export type StatusErrorResponse = GenericErrorResponse<GenericErrorStatus>;
+export type StatusErrorResponse = StatusWithMessageResponse<GenericErrorStatus>;
 export type StatusOKResponse<Data> = { status: "ok" } & Data;
 
-export type APIResponse<Response extends StatusErrorResponse> = Promise<Response>;
+export type APIResponse<OKResponse> = Promise<StatusErrorResponse | StatusOKResponse<OKResponse>>;
 
-async function apiRequest<Response extends StatusErrorResponse>({
+async function apiRequest<Response>({
     url,
     method,
     body,
@@ -65,20 +63,14 @@ async function apiRequest<Response extends StatusErrorResponse>({
     throw new Error("Error");
 }
 
-export function apiGetRequest<Response extends StatusErrorResponse>(
-    params: ApiRequestBaseParameters
-) {
+export function apiGetRequest<Response>(params: ApiRequestBaseParameters) {
     return apiRequest<Response>({ method: "GET", ...params });
 }
 
-export function apiPutRequest<Response extends StatusErrorResponse>(
-    params: ApiRequestBaseParameters
-) {
+export function apiPutRequest<Response>(params: ApiRequestBaseParameters) {
     return apiRequest<Response>({ method: "POST", ...params });
 }
 
-export function apiPostRequest<Response extends StatusErrorResponse>(
-    params: ApiRequestBaseParameters
-) {
+export function apiPostRequest<Response>(params: ApiRequestBaseParameters) {
     return apiRequest<Response>({ method: "PUT", ...params });
 }

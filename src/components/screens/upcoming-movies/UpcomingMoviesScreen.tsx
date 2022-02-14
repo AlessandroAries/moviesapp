@@ -1,39 +1,69 @@
 import { observer } from "mobx-react";
-import React from "react";
-import { ListRenderItemInfo, SafeAreaView, Text, View } from "react-native";
-import { Movie } from "../../../api/movie";
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { Button, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useStores } from "../../../hooks/mobx-hooks";
-import { PaginatedFlatList } from "../../common/PaginatedFlatList";
+import { UpcomingMovieScreenProps } from "../../../navigation/MainStackNavigator";
+import { Movie } from "../../../types";
+import { H3 } from "../../common/Headings";
 import { Colors } from "../../common/Styles";
+import { UpcomingMoviesList } from "./UpcomingMoviesList";
+import { UpcomingMoviesScreenFilterButton } from "./UpcomingMoviesScreenFilterButton";
 
-const UpcomingMoviesScreenComponent: React.FC = () => {
+const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps) => {
     const { moviesStore } = useStores();
+    const [filter, setFilter] = useState<boolean>(false);
 
-    function renderMovieItem(info: ListRenderItemInfo<Movie>) {
-        return <MovieItem {...info.item} />;
+    function onSearchPress() {
+        setFilter((f) => !f);
     }
 
+    function headerRight() {
+        return <UpcomingMoviesScreenFilterButton onPress={onSearchPress} filter={filter} />;
+    }
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight,
+        });
+    }, [navigation, filter]);
+
     async function loadNextPage() {
-        return await moviesStore.loadNextPageUpcomingMovies();
+        return moviesStore.loadNextPageUpcomingMovies();
+    }
+
+    async function onRefresh() {
+        return moviesStore.refreshUpcomingMovies();
     }
 
     return (
         <SafeAreaView style={{ backgroundColor: Colors.WHITE }}>
-            <PaginatedFlatList
-                data={moviesStore.filteredUpcomingMovies}
-                renderItem={renderMovieItem}
+            {filter && (
+                <TextInput
+                    onChangeText={(text: string) => {
+                        moviesStore.setUpcomingMoviesNameFilter(text);
+                    }}
+                    style={{ borderColor: Colors.BLACK, borderWidth: 1 }}
+                />
+            )}
+            <UpcomingMoviesList
+                movies={moviesStore.filteredUpcomingMovies}
                 loadNextPage={loadNextPage}
+                onRefresh={onRefresh}
             />
+            {filter && !moviesStore.filteredUpcomingMovies.length && (
+                <View style={styles.noMoviesContainer}>
+                    <H3>{"No movies found for your search"}</H3>
+                </View>
+            )}
         </SafeAreaView>
     );
 };
 
 export const UpcomingMoviesScreen = observer(UpcomingMoviesScreenComponent);
 
-function MovieItem({ title }: Movie) {
-    return (
-        <View style={{ height: 100 }}>
-            <Text>{title}</Text>
-        </View>
-    );
-}
+const styles = StyleSheet.create({
+    noMoviesContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+    },
+});
