@@ -126,7 +126,7 @@ function mapAPIMovieToMovie(apiMovie: APIMovie, genres: Genre[]): Movie {
         title: apiMovie.title,
         genres,
         imagePath: apiMovie.poster_path || apiMovie.backdrop_path,
-        releaseDate: dayjs(apiMovie.release_date),
+        releaseDate: dayjs(apiMovie.release_date).valueOf(),
         overview: apiMovie.overview,
     };
 }

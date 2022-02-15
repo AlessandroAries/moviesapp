@@ -1,5 +1,4 @@
 import React from "react";
-import { MobXProviderContext } from "mobx-react";
 import { useContext } from "react";
 import { MoviesStore } from "../stores/moviesStore";
 

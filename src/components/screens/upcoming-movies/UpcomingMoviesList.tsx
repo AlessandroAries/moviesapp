@@ -8,11 +8,12 @@ type Props = {
     movies: Movie[];
     loadNextPage: () => Promise<boolean>;
     onRefresh: () => Promise<void>;
+    onPressMovie: (movie: Movie) => void;
 };
 
-export function UpcomingMoviesList({ movies, loadNextPage, onRefresh }: Props) {
+export function UpcomingMoviesList({ movies, loadNextPage, onRefresh, onPressMovie }: Props) {
     function renderMovieItem(info: ListRenderItemInfo<Movie>) {
-        return <UpcomingMovieListItem {...info.item} />;
+        return <UpcomingMovieListItem movie={info.item} onPress={onPressMovie} />;
     }
 
     return (

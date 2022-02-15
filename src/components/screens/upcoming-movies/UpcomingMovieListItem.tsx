@@ -1,22 +1,28 @@
+import dayjs from "dayjs";
 import React from "react";
-import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { formatMovieGenresText, formatMovieImageUrl } from "../../../format";
 import { Movie } from "../../../types";
 import { H2, H3 } from "../../common/Headings";
 import { Colors, Margins } from "../../common/Styles";
 
-const MOVIE_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
+type Props = {
+    movie: Movie;
+    onPress: (movie: Movie) => void;
+};
+export const UpcomingMovieListItem: React.FC<Props> = ({ movie, ...props }: Props) => {
+    const genresText = formatMovieGenresText(movie);
 
-export const UpcomingMovieListItem: React.FC<Movie> = (movie: Movie) => {
-    const genresText = movie.genres.reduce(
-        (acc, value, index) => `${acc}${index !== 0 ? ", " : ""}${value.name}`,
-        ""
-    );
+    function onPress() {
+        props.onPress(movie);
+    }
+
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={onPress}>
             <Image
                 source={
                     movie.imagePath
-                        ? { uri: `${MOVIE_IMAGE_BASE_URL}${movie.imagePath}` }
+                        ? { uri: formatMovieImageUrl(movie) }
                         : require("../../../../assets/movie_board.png")
                 }
                 resizeMode={"contain"}
@@ -26,9 +32,9 @@ export const UpcomingMovieListItem: React.FC<Movie> = (movie: Movie) => {
                 <H2>{movie.title}</H2>
                 <Text>{genresText}</Text>
                 <H3 style={styles.releaseDateText}>{`Release date`}</H3>
-                <Text>{movie.releaseDate.format("MM-DD-YYYY")}</Text>
+                <Text>{dayjs(movie.releaseDate).format("MM-DD-YYYY")}</Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 

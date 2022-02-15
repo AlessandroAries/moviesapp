@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { ActivityIndicator, FlatList, ListRenderItem, RefreshControl, View } from "react-native";
+import {
+    ActivityIndicator,
+    FlatList,
+    ListRenderItem,
+    RefreshControl,
+    StyleSheet,
+    View,
+} from "react-native";
 import { Colors } from "./Styles";
 
 type Props<Data> = {
@@ -34,8 +41,6 @@ export function PaginatedFlatList<Data>({
         <FlatList
             data={data === "loading" ? [] : data}
             renderItem={renderItem}
-            style={{ backgroundColor: Colors.WHITE }}
-            contentContainerStyle={{ backgroundColor: Colors.WHITE }}
             onEndReached={onEndReached}
             ListFooterComponent={loadingNextPage ? ListFooterComponent : undefined}
             onEndReachedThreshold={0.5}
@@ -48,14 +53,16 @@ export function PaginatedFlatList<Data>({
 
 function ListFooterComponent() {
     return (
-        <View
-            style={{
-                height: 50,
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
+        <View style={styles.footer}>
             <ActivityIndicator color={Colors.DARK_GREY} size={"small"} />
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    footer: {
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+});

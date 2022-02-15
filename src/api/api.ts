@@ -1,5 +1,6 @@
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
 const API_BASE_URL = "https://api.themoviedb.org/3";
+export const MOVIE_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 const API_HEADERS = {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -55,12 +56,14 @@ async function apiRequest<Response>({
         headers: API_HEADERS,
         body,
     });
-    const data = await response.json();
-    if (response.status === 200) {
+    const status = response.status.toString();
+    // NOTE: Normally we would cover all kinds of statuses, but for simplicity we only have "ok" or "error"
+    if (status.startsWith("2")) {
+        const data = await response.json();
         return { status: "ok", ...data };
+    } else {
+        return { status: "error" };
     }
-    // TODO: implement other statuses
-    throw new Error("Error");
 }
 
 export function apiGetRequest<Response>(params: ApiRequestBaseParameters) {

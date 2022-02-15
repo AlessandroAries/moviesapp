@@ -1,12 +1,18 @@
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
+import { MovieDetailScreen } from "../components/screens/movie-detail/MovieDetail";
 import { UpcomingMoviesScreen } from "../components/screens/upcoming-movies/UpcomingMoviesScreen";
+import { Movie } from "../types";
 
-type RootStackParamList = {
+export type RootStackParamList = {
     UpcomingMovies: {};
+    MovieDetail: {
+        movie: Movie;
+    };
 };
 
 export type UpcomingMovieScreenProps = NativeStackScreenProps<RootStackParamList, "UpcomingMovies">;
+export type MovieDetailScreenProps = NativeStackScreenProps<RootStackParamList, "MovieDetail">;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -18,6 +24,13 @@ export const MainStackNavigator: React.FC = () => {
                 component={UpcomingMoviesScreen}
                 options={{
                     title: "Upcoming movies",
+                }}
+            />
+            <Stack.Screen
+                name="MovieDetail"
+                component={MovieDetailScreen}
+                options={{
+                    title: "Movie",
                 }}
             />
         </Stack.Navigator>
