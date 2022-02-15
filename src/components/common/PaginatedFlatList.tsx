@@ -10,11 +10,12 @@ import {
 import { Colors } from "./Styles";
 
 type Props<Data> = {
-    data: Data[] | "loading";
+    data: Data[];
     renderItem: ListRenderItem<Data>;
     loadNextPage: () => Promise<boolean>;
     onRefresh: () => Promise<void>;
     header?: JSX.Element;
+    refreshing: boolean;
 };
 
 export function PaginatedFlatList<Data>({
@@ -23,6 +24,7 @@ export function PaginatedFlatList<Data>({
     renderItem,
     onRefresh,
     header,
+    refreshing,
 }: Props<Data>) {
     const [loadingNextPage, setLoadingNextPage] = useState<boolean>(false);
     const [loadedAllPages, setLoadedAllPages] = useState<boolean>(false);
@@ -42,14 +44,12 @@ export function PaginatedFlatList<Data>({
     return (
         <FlatList
             ListHeaderComponent={header}
-            data={data === "loading" ? [] : data}
+            data={data}
             renderItem={renderItem}
             onEndReached={onEndReached}
             ListFooterComponent={loadingNextPage ? ListFooterComponent : undefined}
             onEndReachedThreshold={0.5}
-            refreshControl={
-                <RefreshControl refreshing={data === "loading"} onRefresh={onRefresh} />
-            }
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
     );
 }

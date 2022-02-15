@@ -5,11 +5,12 @@ import { PaginatedFlatList } from "../../common/PaginatedFlatList";
 import { UpcomingMovieListItem } from "./UpcomingMovieListItem";
 
 type Props = {
-    movies: Movie[] | "loading";
+    movies: Movie[];
     loadNextPage: () => Promise<boolean>;
     onRefresh: () => Promise<void>;
     onPressMovie: (movie: Movie) => void;
     header?: JSX.Element;
+    refreshing: boolean;
 };
 
 export function UpcomingMoviesList({
@@ -18,6 +19,7 @@ export function UpcomingMoviesList({
     onRefresh,
     onPressMovie,
     header,
+    refreshing,
 }: Props) {
     function renderMovieItem(info: ListRenderItemInfo<Movie>) {
         return <UpcomingMovieListItem movie={info.item} onPress={onPressMovie} />;
@@ -30,6 +32,7 @@ export function UpcomingMoviesList({
             loadNextPage={loadNextPage}
             onRefresh={onRefresh}
             header={header}
+            refreshing={refreshing}
         />
     );
 }

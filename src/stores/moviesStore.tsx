@@ -6,7 +6,10 @@ import { Genre, Movie } from "../types";
 
 export class MoviesStore {
     @observable
-    private upcomingMovies: Movie[] | "loading" | "failed" = "loading";
+    upcomingMoviesState: "loading" | "failed" | "done" = "loading";
+
+    @observable
+    private upcomingMovies: Movie[] = [];
 
     @observable
     private movieGenres: Genre[] = [];
@@ -34,7 +37,7 @@ export class MoviesStore {
     // Actions
     @action
     async refreshUpcomingMovies() {
-        this.setUpcomingMovies("loading");
+        this.setUpcomingMoviesState("loading");
         this.setUpcomingMoviesCurrentPage(1);
         const [upcomingMoviesResponse, genresResponse] = await Promise.all([
             getUpcomingMovies(this.upcomingMoviesCurrentPage),
@@ -43,8 +46,9 @@ export class MoviesStore {
         if (upcomingMoviesResponse.status === "ok") {
             this.setUpcomingMovies(this.mapApiMoviesToMovies(upcomingMoviesResponse.results));
             this.setUpcomingMoviesTotalPages(upcomingMoviesResponse.total_pages);
+            this.setUpcomingMoviesState("done");
         } else {
-            this.setUpcomingMovies("failed");
+            this.setUpcomingMoviesState("failed");
         }
         if (genresResponse.status === "ok") {
             this.setMovieGenres(genresResponse.genres);
@@ -60,7 +64,7 @@ export class MoviesStore {
 
     @action
     async loadNextPageUpcomingMovies(): Promise<boolean> {
-        if (this.upcomingMovies === "loading" || this.upcomingMovies === "failed") {
+        if (this.upcomingMoviesState === "loading" || this.upcomingMoviesState === "failed") {
             throw new Error("Upcoming movies is loading or failed while loading next page");
         }
         if (this.upcomingMoviesCurrentPage === 1 && this.upcomingMoviesTotalPages === 0) {
@@ -86,8 +90,13 @@ export class MoviesStore {
     }
 
     @action
-    setUpcomingMovies(upcomingMovies: Movie[] | "loading" | "failed") {
+    setUpcomingMovies(upcomingMovies: Movie[]) {
         this.upcomingMovies = upcomingMovies;
+    }
+
+    @action
+    setUpcomingMoviesState(state: "loading" | "failed" | "done") {
+        this.upcomingMoviesState = state;
     }
 
     @action
@@ -122,9 +131,13 @@ export class MoviesStore {
 
     // Computed values
     @computed
-    get filteredUpcomingMovies() {
+    get filteredUpcomingMovies(): Movie[] {
         const nameFilter = this.upcomingMoviesNameFilter;
-        if (this.upcomingMovies === "failed" || this.upcomingMovies === "loading" || !nameFilter) {
+        if (
+            this.upcomingMoviesState === "failed" ||
+            this.upcomingMoviesState === "loading" ||
+            !nameFilter
+        ) {
             return this.upcomingMovies;
         }
 

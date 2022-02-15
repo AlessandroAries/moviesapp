@@ -34,7 +34,7 @@ const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps)
     }
 
     const showMessage =
-        moviesStore.filteredUpcomingMovies === "failed" ||
+        moviesStore.upcomingMoviesState === "failed" ||
         (filter && !moviesStore.filteredUpcomingMovies.length);
     return (
         <SafeAreaView style={{ backgroundColor: Colors.GREY }}>
@@ -50,11 +50,8 @@ const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps)
             )}
 
             <UpcomingMoviesList
-                movies={
-                    moviesStore.filteredUpcomingMovies !== "failed"
-                        ? moviesStore.filteredUpcomingMovies
-                        : []
-                }
+                movies={moviesStore.filteredUpcomingMovies}
+                refreshing={moviesStore.upcomingMoviesState === "loading"}
                 loadNextPage={loadNextPage}
                 onRefresh={onRefresh}
                 onPressMovie={onPressMovie}
@@ -62,7 +59,7 @@ const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps)
                     showMessage ? (
                         <View style={styles.noMoviesContainer}>
                             <H3>
-                                {moviesStore.filteredUpcomingMovies === "failed"
+                                {moviesStore.upcomingMoviesState === "failed"
                                     ? "Something went wrong while fetching the upcoming movies. Please try again by refreshing this page"
                                     : "No movies found for your search"}
                             </H3>
