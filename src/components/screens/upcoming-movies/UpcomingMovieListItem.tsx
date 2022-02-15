@@ -2,13 +2,13 @@ import dayjs from "dayjs";
 import React from "react";
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { formatMovieGenresText, formatMovieImageUrl } from "../../../format";
-import { Movie } from "../../../types";
+import { MovieWithGenres } from "../../../types";
 import { H2, H3 } from "../../common/Headings";
 import { Colors, Margins } from "../../common/Styles";
 
 type Props = {
-    movie: Movie;
-    onPress: (movie: Movie) => void;
+    movie: MovieWithGenres;
+    onPress: (movie: MovieWithGenres) => void;
 };
 export const UpcomingMovieListItem: React.FC<Props> = ({ movie, ...props }: Props) => {
     const genresText = formatMovieGenresText(movie);

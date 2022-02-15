@@ -2,12 +2,12 @@ import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navig
 import React from "react";
 import { MovieDetailScreen } from "../components/screens/movie-detail/MovieDetail";
 import { UpcomingMoviesScreen } from "../components/screens/upcoming-movies/UpcomingMoviesScreen";
-import { Movie } from "../types";
+import { MovieWithGenres } from "../types";
 
 export type RootStackParamList = {
     UpcomingMovies: {};
     MovieDetail: {
-        movie: Movie;
+        movie: MovieWithGenres;
     };
 };
 

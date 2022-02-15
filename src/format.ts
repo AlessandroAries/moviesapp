@@ -1,7 +1,7 @@
 import { MOVIE_IMAGE_BASE_URL } from "./api/api";
-import { Movie } from "./types";
+import { Movie, MovieWithGenres } from "./types";
 
-export function formatMovieGenresText(movie: Movie) {
+export function formatMovieGenresText(movie: MovieWithGenres) {
     return movie.genres.reduce(
         (acc, value, index) => `${acc}${index !== 0 ? ", " : ""}${value.name}`,
         ""

@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { action, computed, makeObservable, observable } from "mobx";
 import { getMovieGenres } from "../api/genre";
 import { getUpcomingMovies, APIMovie } from "../api/movie";
-import { Genre, Movie } from "../types";
+import { Genre, Movie, MovieWithGenres } from "../types";
 
 export class MoviesStore {
     @observable
@@ -119,40 +119,42 @@ export class MoviesStore {
         this.movieGenres = genres;
     }
 
-    getGenresOfMovie(movie: APIMovie) {
+    getGenresOfMovie(movie: Movie) {
         return this.movieGenres.filter((genre) => movie.genre_ids.includes(genre.id));
     }
 
     mapApiMoviesToMovies(apiMovies: APIMovie[]) {
-        return apiMovies.map((apiMovie) =>
-            mapAPIMovieToMovie(apiMovie, this.getGenresOfMovie(apiMovie))
-        );
+        return apiMovies.map((apiMovie) => mapAPIMovieToMovie(apiMovie));
     }
 
     // Computed values
     @computed
-    get filteredUpcomingMovies(): Movie[] {
+    get filteredUpcomingMovies(): MovieWithGenres[] {
         const nameFilter = this.upcomingMoviesNameFilter;
+        const moviesWithGenres = this.upcomingMovies.map((movie) => ({
+            ...movie,
+            genres: this.getGenresOfMovie(movie),
+        }));
         if (
             this.upcomingMoviesState === "failed" ||
             this.upcomingMoviesState === "loading" ||
             !nameFilter
         ) {
-            return this.upcomingMovies;
+            return moviesWithGenres;
         }
 
-        return this.upcomingMovies.filter((upcomingMovie) =>
+        return moviesWithGenres.filter((upcomingMovie) =>
             upcomingMovie.title.toLowerCase().includes(nameFilter.toLowerCase())
         );
     }
 }
 
-function mapAPIMovieToMovie(apiMovie: APIMovie, genres: Genre[]): Movie {
+function mapAPIMovieToMovie(apiMovie: APIMovie): Movie {
     return {
         title: apiMovie.title,
-        genres,
         imagePath: apiMovie.poster_path || apiMovie.backdrop_path,
         releaseDate: dayjs(apiMovie.release_date).valueOf(),
         overview: apiMovie.overview,
+        genre_ids: apiMovie.genre_ids,
     };
 }

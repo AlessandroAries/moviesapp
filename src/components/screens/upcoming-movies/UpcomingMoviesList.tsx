@@ -1,14 +1,14 @@
 import React from "react";
 import { ListRenderItemInfo } from "react-native";
-import { Movie } from "../../../types";
+import { MovieWithGenres } from "../../../types";
 import { PaginatedFlatList } from "../../common/PaginatedFlatList";
 import { UpcomingMovieListItem } from "./UpcomingMovieListItem";
 
 type Props = {
-    movies: Movie[];
+    movies: MovieWithGenres[];
     loadNextPage: () => Promise<boolean>;
     onRefresh: () => Promise<void>;
-    onPressMovie: (movie: Movie) => void;
+    onPressMovie: (movie: MovieWithGenres) => void;
     header?: JSX.Element;
     refreshing: boolean;
 };
@@ -21,7 +21,7 @@ export function UpcomingMoviesList({
     header,
     refreshing,
 }: Props) {
-    function renderMovieItem(info: ListRenderItemInfo<Movie>) {
+    function renderMovieItem(info: ListRenderItemInfo<MovieWithGenres>) {
         return <UpcomingMovieListItem movie={info.item} onPress={onPressMovie} />;
     }
 

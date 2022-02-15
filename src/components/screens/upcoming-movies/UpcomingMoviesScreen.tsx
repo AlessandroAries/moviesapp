@@ -3,7 +3,7 @@ import React, { useLayoutEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, TextInput, View } from "react-native";
 import { useStores } from "../../../hooks/mobx-hooks";
 import { UpcomingMovieScreenProps } from "../../../navigation/MainStackNavigator";
-import { Movie } from "../../../types";
+import { MovieWithGenres } from "../../../types";
 import { H3 } from "../../common/Headings";
 import { Colors, Margins } from "../../common/Styles";
 import { UpcomingMoviesList } from "./UpcomingMoviesList";
@@ -29,7 +29,7 @@ const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps)
         return moviesStore.refreshUpcomingMovies();
     }
 
-    function onPressMovie(movie: Movie) {
+    function onPressMovie(movie: MovieWithGenres) {
         navigation.navigate("MovieDetail", { movie });
     }
 
