@@ -1,4 +1,4 @@
-import { apiGetRequest, StatusErrorResponse, StatusOKResponse } from "./api";
+import { apiGetRequest } from "./api";
 
 const BASE_URL = "/movie";
 

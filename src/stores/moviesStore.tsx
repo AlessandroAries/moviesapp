@@ -6,7 +6,7 @@ import { Genre, Movie } from "../types";
 
 export class MoviesStore {
     @observable
-    private upcomingMovies: Movie[] = [];
+    private upcomingMovies: Movie[] | "loading" | "failed" = "loading";
 
     @observable
     private movieGenres: Genre[] = [];
@@ -34,34 +34,47 @@ export class MoviesStore {
     // Actions
     @action
     async refreshUpcomingMovies() {
+        this.setUpcomingMovies("loading");
         this.setUpcomingMoviesCurrentPage(1);
         const [upcomingMoviesResponse, genresResponse] = await Promise.all([
             getUpcomingMovies(this.upcomingMoviesCurrentPage),
             getMovieGenres(),
         ]);
+        if (upcomingMoviesResponse.status === "ok") {
+            this.setUpcomingMovies(this.mapApiMoviesToMovies(upcomingMoviesResponse.results));
+            this.setUpcomingMoviesTotalPages(upcomingMoviesResponse.total_pages);
+        } else {
+            this.setUpcomingMovies("failed");
+        }
         if (genresResponse.status === "ok") {
             this.setMovieGenres(genresResponse.genres);
         } else {
-            // TODO: retry some other time?
+            // Try to fetch genres a second time
+            const secondMovieGenresResponse = await getMovieGenres();
+            if (secondMovieGenresResponse.status === "ok") {
+                this.setMovieGenres(secondMovieGenresResponse.genres);
+            }
+            // If this also fails, the user can refresh the movies and therefor also the movies by manually refreshing
         }
-        if (upcomingMoviesResponse.status !== "ok") {
-            // TODO
-            console.warn("no status ok");
-            return;
-        }
-        this.setUpcomingMovies(this.mapApiMoviesToMovies(upcomingMoviesResponse.results));
-        this.setUpcomingMoviesTotalPages(upcomingMoviesResponse.total_pages);
     }
 
     @action
     async loadNextPageUpcomingMovies(): Promise<boolean> {
+        if (this.upcomingMovies === "loading" || this.upcomingMovies === "failed") {
+            throw new Error("Upcoming movies is loading or failed while loading next page");
+        }
+        if (this.upcomingMoviesCurrentPage === 1 && this.upcomingMoviesTotalPages === 0) {
+            // First refresh went wrong
+            await this.refreshUpcomingMovies();
+            return false;
+        }
         if (this.upcomingMoviesCurrentPage === this.upcomingMoviesTotalPages) {
             return true;
         }
 
         const response = await getUpcomingMovies(this.upcomingMoviesCurrentPage + 1);
         if (response.status !== "ok") {
-            // TODO
+            // This will not set current page so the next time this page will be fetched
             return false;
         }
         this.setUpcomingMoviesCurrentPage(this.upcomingMoviesCurrentPage + 1);
@@ -73,7 +86,7 @@ export class MoviesStore {
     }
 
     @action
-    setUpcomingMovies(upcomingMovies: Movie[]) {
+    setUpcomingMovies(upcomingMovies: Movie[] | "loading" | "failed") {
         this.upcomingMovies = upcomingMovies;
     }
 
@@ -111,7 +124,7 @@ export class MoviesStore {
     @computed
     get filteredUpcomingMovies() {
         const nameFilter = this.upcomingMoviesNameFilter;
-        if (!nameFilter) {
+        if (this.upcomingMovies === "failed" || this.upcomingMovies === "loading" || !nameFilter) {
             return this.upcomingMovies;
         }
 

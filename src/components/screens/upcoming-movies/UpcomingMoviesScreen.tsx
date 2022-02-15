@@ -26,7 +26,6 @@ const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps)
     }
 
     async function onRefresh() {
-        // TODO: Set data to "loading"
         return moviesStore.refreshUpcomingMovies();
     }
 
@@ -34,6 +33,9 @@ const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps)
         navigation.navigate("MovieDetail", { movie });
     }
 
+    const showMessage =
+        moviesStore.filteredUpcomingMovies === "failed" ||
+        (filter && !moviesStore.filteredUpcomingMovies.length);
     return (
         <SafeAreaView style={{ backgroundColor: Colors.GREY }}>
             {filter && (
@@ -47,18 +49,27 @@ const UpcomingMoviesScreenComponent = ({ navigation }: UpcomingMovieScreenProps)
                 />
             )}
 
-            {filter && !moviesStore.filteredUpcomingMovies.length ? (
-                <View style={styles.noMoviesContainer}>
-                    <H3>{"No movies found for your search"}</H3>
-                </View>
-            ) : (
-                <UpcomingMoviesList
-                    movies={moviesStore.filteredUpcomingMovies}
-                    loadNextPage={loadNextPage}
-                    onRefresh={onRefresh}
-                    onPressMovie={onPressMovie}
-                />
-            )}
+            <UpcomingMoviesList
+                movies={
+                    moviesStore.filteredUpcomingMovies !== "failed"
+                        ? moviesStore.filteredUpcomingMovies
+                        : []
+                }
+                loadNextPage={loadNextPage}
+                onRefresh={onRefresh}
+                onPressMovie={onPressMovie}
+                header={
+                    showMessage ? (
+                        <View style={styles.noMoviesContainer}>
+                            <H3>
+                                {moviesStore.filteredUpcomingMovies === "failed"
+                                    ? "Something went wrong while fetching the upcoming movies. Please try again by refreshing this page"
+                                    : "No movies found for your search"}
+                            </H3>
+                        </View>
+                    ) : undefined
+                }
+            />
         </SafeAreaView>
     );
 };
@@ -69,6 +80,7 @@ const styles = StyleSheet.create({
     noMoviesContainer: {
         justifyContent: "center",
         alignItems: "center",
+        marginHorizontal: Margins.MARGIN_NORMAL,
     },
     input: {
         borderColor: Colors.BLACK,

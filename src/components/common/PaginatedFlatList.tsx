@@ -14,6 +14,7 @@ type Props<Data> = {
     renderItem: ListRenderItem<Data>;
     loadNextPage: () => Promise<boolean>;
     onRefresh: () => Promise<void>;
+    header?: JSX.Element;
 };
 
 export function PaginatedFlatList<Data>({
@@ -21,6 +22,7 @@ export function PaginatedFlatList<Data>({
     data,
     renderItem,
     onRefresh,
+    header,
 }: Props<Data>) {
     const [loadingNextPage, setLoadingNextPage] = useState<boolean>(false);
     const [loadedAllPages, setLoadedAllPages] = useState<boolean>(false);
@@ -39,6 +41,7 @@ export function PaginatedFlatList<Data>({
 
     return (
         <FlatList
+            ListHeaderComponent={header}
             data={data === "loading" ? [] : data}
             renderItem={renderItem}
             onEndReached={onEndReached}
